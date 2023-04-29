@@ -1,43 +1,78 @@
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { useForm, zodResolver } from "@mantine/form";
-import { TextInput, PasswordInput, Button, Text } from "@mantine/core";
-import { z } from "zod";
+import { TextInput, PasswordInput, Button, Text, Alert } from "@mantine/core";
 
-import AuthLayout from "./layouts/auth";
-import Link from "./components/generic/link";
-
-const schema = z
-  .object({
-    name: z.string().min(2, { message: "Name should have at least 2 letters" }),
-    email: z.string().email({ message: "Invalid email" }),
-    password: z.string().min(4),
-    confirmPassword: z.string().min(4),
-  })
-  .superRefine(({ confirmPassword, password }, ctx) => {
-    if (confirmPassword !== password) {
-      ctx.addIssue({
-        code: "custom",
-        message: "The passwords did not match",
-      });
-    }
-  });
+import AuthLayout from "@/layouts/auth";
+import Link from "@/components/generic/link";
+import { schema } from "@/schemas/register";
+import { IconAlertCircle } from "@tabler/icons-react";
+import { useMutation } from "react-query";
+import { postRegister } from "@/services/auth";
+import axios, { AxiosError } from "axios";
+import { GetServerSidePropsContext } from "next";
+import { serverApi } from "@/lib/axios";
 
 function Register() {
-  const { getInputProps, onSubmit, isValid } = useForm({
+  const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const { getInputProps, onSubmit, isValid, reset } = useForm({
     validate: zodResolver(schema),
     validateInputOnChange: true,
     initialValues: {
       name: "",
       email: "",
       password: "",
-      confirmPassword: "",
+      passwordConfirm: "",
     },
   });
 
+  const { mutate, isLoading, error } = useMutation(postRegister, {
+    onSuccess: () => {
+      setSuccess(true);
+      reset();
+    },
+    onError: (err: AxiosError) => {
+      if (axios.isAxiosError(err)) {
+        const serverError =
+          //@ts-ignore
+          error.response?.data?.error?.[0]?.message ||
+          //@ts-ignore
+          error.response?.data?.message;
+
+        setServerError(serverError);
+      } else {
+        setServerError("Runtime Error");
+      }
+    },
+  });
+
+  const handleRegister = onSubmit((values) => mutate(values));
+
   return (
     <>
-      <form onSubmit={onSubmit((values) => console.log(values))}>
+      <form onSubmit={handleRegister}>
+        {!!serverError && (
+          <Alert
+            icon={<IconAlertCircle size="1rem" />}
+            title="Info!"
+            color="red"
+            mb="md"
+          >
+            {serverError}
+          </Alert>
+        )}
+        {success && (
+          <Alert
+            icon={<IconAlertCircle size="1rem" />}
+            title="Info!"
+            color="green"
+            mb="md"
+          >
+            Successfully Register, Please Login!!!
+          </Alert>
+        )}
         <TextInput
           label="Full Name"
           placeholder="Fadhil Darma Putera Zagoto"
@@ -63,9 +98,16 @@ function Register() {
           placeholder="Retype Your password"
           mt="md"
           size="md"
-          {...getInputProps("confirmPassword")}
+          {...getInputProps("passwordConfirm")}
         />
-        <Button type="submit" fullWidth mt="xl" size="md" disabled={!isValid()}>
+        <Button
+          type="submit"
+          fullWidth
+          mt="xl"
+          size="md"
+          disabled={!isValid()}
+          loading={isLoading}
+        >
           Register
         </Button>
       </form>
@@ -82,3 +124,29 @@ Register.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default Register;
+
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+  try {
+    if (ctx?.req?.headers?.cookie) {
+      const response = await serverApi(ctx).get("/users/me");
+      const user = response.data;
+
+      if (user) {
+        return {
+          redirect: {
+            destination: "/job-board",
+            permanent: false,
+          },
+        };
+      }
+    }
+
+    return {
+      props: {},
+    };
+  } catch (error) {
+    return {
+      props: {},
+    };
+  }
+};

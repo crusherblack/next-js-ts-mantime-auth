@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 
 import { Paper, Title, createStyles, rem } from "@mantine/core";
-import { APPLICATION_NAME, AUTH_IMAGE_BACKGROUND_URL } from "../constant";
+import { APPLICATION_NAME, AUTH_IMAGE_BACKGROUND_URL } from "@/constant";
 
 type Props = {
   isRegister?: boolean;

@@ -1,6 +1,7 @@
 import { useState, ReactElement, ReactNode } from "react";
 import NextApp, { AppProps, AppContext } from "next/app";
 import { NextPage } from "next";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import { getCookie, setCookie } from "cookies-next";
 import Head from "next/head";
@@ -18,6 +19,8 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 } & { colorScheme: ColorScheme };
+
+const queryClient = new QueryClient();
 
 export default function App({
   Component,
@@ -41,7 +44,7 @@ export default function App({
   return (
     <>
       <Head>
-        <title>Mantine next example</title>
+        <title>Github Jobs | Fadhil Darma Putera Zagoto</title>
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"
@@ -58,7 +61,9 @@ export default function App({
           withGlobalStyles
           withNormalizeCSS
         >
-          {getLayout(<Component {...pageProps} />)}
+          <QueryClientProvider client={queryClient}>
+            {getLayout(<Component {...pageProps} />)}
+          </QueryClientProvider>
           <Notifications />
         </MantineProvider>
       </ColorSchemeProvider>
