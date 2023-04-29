@@ -1,9 +1,7 @@
 import React, { PropsWithChildren } from "react";
 
-import { Paper, Title, createStyles, rem } from "@mantine/core";
+import { Box, Paper, Title, createStyles, rem } from "@mantine/core";
 import { APPLICATION_NAME, AUTH_IMAGE_BACKGROUND_URL } from "@/constant";
-import { GetServerSidePropsContext } from "next";
-import { serverApi } from "@/lib/axios";
 
 type Props = {
   isRegister?: boolean;
@@ -16,14 +14,14 @@ const AuthLayout: React.FC<PropsWithChildren<Props>> = ({
   const { classes } = useStyles();
 
   return (
-    <div className={classes.wrapper}>
+    <Box className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
         <Title order={2} className={classes.title} ta="center" mt="md" mb={50}>
           Welcome {!isRegister && "Back"} to {APPLICATION_NAME}
         </Title>{" "}
         {children}
       </Paper>
-    </div>
+    </Box>
   );
 };
 
