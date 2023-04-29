@@ -21,6 +21,7 @@ import Router from "next/router";
 import axios, { AxiosError } from "axios";
 import { serverApi } from "@/lib/axios";
 import { GetServerSidePropsContext } from "next";
+import { notifications } from "@mantine/notifications";
 
 function Login() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -38,6 +39,12 @@ function Login() {
   const { mutate, isLoading, error } = useMutation(postLogin, {
     onSuccess: (response) => {
       setCookie("token", response.data.accessToken);
+      notifications.show({
+        title: "Notification",
+        message: "Welcome To Github Jobs",
+        autoClose: 5000,
+        withCloseButton: true,
+      });
 
       Router.replace("/job-board");
     },
