@@ -48,10 +48,7 @@ const JobBoardDetail = ({ user }: { user: UserType }) => {
     queryFn: () => getDetailPosition(positionId as string),
   });
 
-  const position: PositionType = useMemo(
-    () => data?.data?.data?.positions || {},
-    [data]
-  );
+  const position: PositionType = useMemo(() => data?.data?.data || {}, [data]);
 
   return (
     <>

@@ -120,7 +120,7 @@ const JobBoard = ({ user }: { user: UserType }) => {
         full_time: isFulltime ? "true" : "false",
       });
 
-      setPositions(data?.data?.positions);
+      setPositions(data?.data);
     } catch (error) {
       setError(true);
     } finally {
@@ -138,7 +138,7 @@ const JobBoard = ({ user }: { user: UserType }) => {
         full_time: isFulltime ? "true" : "false",
       });
 
-      setPositions((prev) => [...prev, ...data?.data?.positions]);
+      setPositions((prev) => [...prev, ...data?.data]);
     } catch (error) {
       setError(true);
     } finally {
